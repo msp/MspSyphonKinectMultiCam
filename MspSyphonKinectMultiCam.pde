@@ -15,10 +15,16 @@ import codeanticode.syphon.*;
 
 SyphonServer server;
 SyphonServer server2;
+SyphonServer server3;
+SyphonServer server4;
+
 SimpleOpenNI  cam1;
 SimpleOpenNI  cam2;
+
 PGraphics VDMXCanvas;
 PGraphics VDMXCanvas2;
+PGraphics VDMXCanvas3;
+PGraphics VDMXCanvas4;
 
 int kinectWidth  = 640;
 int kinectHeight = 480;
@@ -34,7 +40,9 @@ color black      = color(0, 0, 0);
 void setup() {
   size(kinectWidth * 2 + padding, kinectHeight * 2 + padding, P3D);
   VDMXCanvas   = createGraphics(kinectWidth, kinectHeight, P3D);
-  VDMXCanvas2  = createGraphics(kinectWidth, kinectHeight, P3D);  
+  VDMXCanvas2  = createGraphics(kinectWidth, kinectHeight, P3D);
+  VDMXCanvas3  = createGraphics(kinectWidth, kinectHeight, P3D);
+  VDMXCanvas4  = createGraphics(kinectWidth, kinectHeight, P3D);
 
   SimpleOpenNI.start();  
   printAndValidateNumberOfKinects();
@@ -50,14 +58,19 @@ void draw() {
   detectAndColourUsers(cam1, VDMXCanvas, grey);
   detectAndColourUsers(cam2, VDMXCanvas2, green);
   
+  drawRGBImage(cam1, VDMXCanvas3);
+  drawRGBImage(cam2, VDMXCanvas4);
+  
   server.sendImage(VDMXCanvas);
   server2.sendImage(VDMXCanvas2);
+  server3.sendImage(VDMXCanvas3);
+  server4.sendImage(VDMXCanvas4);
   
   image(VDMXCanvas,0, 0);
-  image(cam1.depthImage(), 0, kinectHeight + padding);
+  image(cam1.rgbImage(), 0, kinectHeight + padding);
   
   image(VDMXCanvas2, kinectWidth + padding, 0);
-  image(cam2.depthImage(), kinectWidth + padding, kinectHeight + padding);  
+  image(cam2.rgbImage(), kinectWidth + padding, kinectHeight + padding);  
 }
 
 void detectAndColourUsers(SimpleOpenNI cam, PGraphics canvas, color userColor) {
@@ -85,6 +98,17 @@ void detectAndColourUsers(SimpleOpenNI cam, PGraphics canvas, color userColor) {
   }
 }
 
+void drawRGBImage(SimpleOpenNI cam, PGraphics canvas) {
+  canvas.beginDraw();
+//  canvas.background(127, 127, 127);
+//  canvas.lights();
+  canvas.image(cam.rgbImage(), 0, 0);
+//  canvas.translate(width/2, height/2);
+//  canvas.rotateX(frameCount * 0.01);
+//  canvas.rotateY(frameCount * 0.01);  
+//  canvas.box(150);
+  canvas.endDraw();  
+}
 void printAndValidateNumberOfKinects() { 
   StrVector kinectList = new StrVector();
   SimpleOpenNI.deviceNames(kinectList);
@@ -125,4 +149,6 @@ void initialiseSyphonServers() {
   // Create syhpon server to send frames out.
   server  = new SyphonServer(this, "Processing Syphon - Kinect 1 Depth Cam ");
   server2 = new SyphonServer(this, "Processing Syphon - Kinect 2 Depth Cam");
+  server3 = new SyphonServer(this, "Processing Syphon - Kinect 1 RGB Cam");
+  server4 = new SyphonServer(this, "Processing Syphon - Kinect 2 RGB Cam");
 }
