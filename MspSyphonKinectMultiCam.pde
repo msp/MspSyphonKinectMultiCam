@@ -50,18 +50,20 @@ void draw() {
   
   detectAndColourUsers(cam1, VDMXCanvas, grey);
   
+  drawDepthImage(cam1, VDMXCanvas);
   drawRGBImage(cam1, VDMXCanvas3);
   
   server.sendImage(VDMXCanvas);
   server3.sendImage(VDMXCanvas3);
   
-  image(VDMXCanvas,0, 0);
-  image(cam1.rgbImage(), 0, kinectHeight + padding);  
+  //image(VDMXCanvas,0, 0);
+  image(cam1.rgbImage(), kinectWidth, kinectHeight + padding);
+  image(cam1.depthImage(), 0, kinectHeight + padding);
 }
 
 void detectAndColourUsers(SimpleOpenNI cam, PGraphics canvas, color userColor) {
   int[] userList = cam.getUsers();  
-  println("users: "+userList.length);
+//  println("users: "+userList.length);
   
   for(int i=0;i<userList.length;i++) {
     canvas.loadPixels();
@@ -95,7 +97,15 @@ void drawRGBImage(SimpleOpenNI cam, PGraphics canvas) {
 //  canvas.box(150);
   canvas.endDraw();  
 }
-void printAndValidateNumberOfKinects() { 
+
+void drawDepthImage(SimpleOpenNI cam, PGraphics canvas) {
+  canvas.beginDraw();
+  canvas.image(cam.depthImage(), 0, 0);
+  canvas.endDraw();  
+}
+
+void printAndValidateNumberOfKinects() {
+  println("printAndValidateNumberOfKinects)"); 
   StrVector kinectList = new StrVector();
   SimpleOpenNI.deviceNames(kinectList);
   for(int i=0;i<kinectList.size();i++)
@@ -106,14 +116,15 @@ void printAndValidateNumberOfKinects() {
     println("only works with 1 cam(s)");
     exit();
     return;
-  }  
+  }
+  println("all good, right number of Kinects connected");
 }
 
 void initialiseKinects() {
   cam1 = new SimpleOpenNI(0,this,SimpleOpenNI.RUN_MODE_MULTI_THREADED);
 
   if(cam1.isInit() == false) {
-     println("Verify that you have two connected cameras on two different usb-busses!"); 
+     println("Verify that you have one/two connected cameras on two different usb-busses!");
      exit();
      return;  
   }
@@ -126,7 +137,7 @@ void initialiseKinects() {
 }
 
 void initialiseSyphonServers() {
-  // Create syhpon server to send frames out.
+  // Create syphon server to send frames out.
   server  = new SyphonServer(this, "Processing Syphon - Kinect 1 Depth Cam ");
   server3 = new SyphonServer(this, "Processing Syphon - Kinect 1 RGB Cam");
 }
